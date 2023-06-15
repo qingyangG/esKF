@@ -1,0 +1,8 @@
+prefix=/home/qingyang/workspace/devel
+
+Name: imu_gps_localization
+Description: Description of imu_gps_localization
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/qingyang/workspace/devel
+
+Name: ekf2d
+Description: Description of ekf2d
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

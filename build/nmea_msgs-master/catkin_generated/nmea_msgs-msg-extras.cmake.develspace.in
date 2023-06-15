@@ -1,0 +1,2 @@
+set(nmea_msgs_MESSAGE_FILES "/home/qingyang/workspace/src/nmea_msgs-master/msg/Gpgga.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/Gpgsa.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/Gpgsv.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/GpgsvSatellite.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/Gprmc.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/Gpgst.msg;/home/qingyang/workspace/src/nmea_msgs-master/msg/Sentence.msg")
+set(nmea_msgs_SERVICE_FILES "")

@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -std=c++14  -shared -Wl,-soname,libGeographicLib_yq.so -o /home/qingyang/workspace/devel/lib/libGeographicLib_yq.so CMakeFiles/GeographicLib_yq.dir/src/LocalCartesian.cpp.o CMakeFiles/GeographicLib_yq.dir/src/Geocentric.cpp.o CMakeFiles/GeographicLib_yq.dir/src/Math.cpp.o 

@@ -1,0 +1,8 @@
+prefix=/home/qingyang/workspace/install
+
+Name: 2D_EKF
+Description: Description of 2D_EKF
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
