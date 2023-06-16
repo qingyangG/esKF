@@ -15,7 +15,13 @@ bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, con
 
     // EKF.
     const Eigen::MatrixXd& P = state->cov;
-    const Eigen::MatrixXd K = P * H.transpose() * (H * P * H.transpose() + V).inverse();
+    // yqtest 
+    const Eigen::MatrixXd invM = (H * P * H.transpose() + V).inverse();
+    if (invM.hasNaN()) {
+        return false;
+    }
+    // const Eigen::MatrixXd K = P * H.transpose() * (H * P * H.transpose() + V).inverse();
+    const Eigen::MatrixXd K = P * H.transpose() * invM;
     const Eigen::VectorXd delta_x = K * residual;
      
     // Add delta_x to state.
@@ -27,6 +33,7 @@ bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, con
     //尝试另外一种稳定形式更新Covariance
     // less stable than above
     //state->cov = P - K * (H*P*H.transpose() + V) * K.transpose();
+    return true;
 }
 
 void GpsProcessor::ComputeJacobianAndResidual(const Eigen::Vector3d& init_lla,  

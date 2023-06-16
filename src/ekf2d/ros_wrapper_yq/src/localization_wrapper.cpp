@@ -29,6 +29,10 @@ LocalizationWrapper::LocalizationWrapper(ros::NodeHandle& nh) {
     file_state_.open(log_folder + "/state.csv");
     file_gps_.open(log_folder +"/gps.csv");
 
+    // record bad gps number
+    consecutiveBadGpsS = 0;
+    consecutiveBadGpsSInit = 0;
+
     // Initialization imu gps localizer.
     imu_gps_localizer_ptr_ = 
         std::make_unique<ImuGpsLocalization_yq::ImuGpsLocalizer>(acc_noise, gyro_noise,
@@ -75,8 +79,34 @@ void LocalizationWrapper::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg_pt
 void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstPtr& gps_msg_ptr) {
     // Check the gps_status.
     if (gps_msg_ptr->status.status != 2) {
-        LOG(WARNING) << "[GpsCallBack]: Bad gps message!";
-        return;
+        //yqtest
+        if (!imu_gps_localizer_ptr_->getInitialized()) {
+            if (consecutiveBadGpsSInit < 25) {  // 5s
+                LOG(WARNING) << "[GpsCallBack]: Bad gps message for initialization!";
+                ROS_INFO("status: %d", gps_msg_ptr->status.status);
+                consecutiveBadGpsSInit++;
+                return;
+            }
+            else if (gps_msg_ptr->status.status >= 0) {
+                LOG(WARNING) << "[GpsCallBack]: Map will be constructed. But the current environment is bad and the map maybe not good.!";
+            }
+            else {
+                LOG(WARNING) << "[GpsCallBack]: Intilization needs extra time because of no usable gps data!";
+                return;
+            }
+        }
+        else if (consecutiveBadGpsS < 2)  {
+            // gps不是很好情况下, 短时间允许不矫正.
+            consecutiveBadGpsS++;
+            return;
+        }
+        else if ( gps_msg_ptr->status.status >= 0){
+            consecutiveBadGpsS = 0;
+        }
+        else {
+            ROS_INFO("status: %d", gps_msg_ptr->status.status);
+            return;
+        }
     }
 
     ImuGpsLocalization_yq::GpsPositionDataPtr gps_data_ptr = std::make_shared<ImuGpsLocalization_yq::GpsPositionData>();
@@ -133,6 +163,9 @@ void LocalizationWrapper::ConvertStateToRosTopic(const ImuGpsLocalization_yq::St
     pose.pose.orientation.z = G_q_I.z();
     pose.pose.orientation.w = G_q_I.w();
 
+    // ROS_INFO("postion: %0.2f, %0.2f, %0.2f, orientation: %0.2f, %0.2f, %0.2f,%0.2f", 
+    //     pose.pose.position.x , pose.pose.position.y, pose.pose.position.z,
+    //     pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w);
     ros_path_.poses.push_back(pose);
 }
 

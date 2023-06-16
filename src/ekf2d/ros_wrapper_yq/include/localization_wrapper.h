@@ -39,4 +39,6 @@ private:
     nav_msgs::Path ros_path_onlyGPS_;
 
     std::unique_ptr<ImuGpsLocalization_yq::ImuGpsLocalizer> imu_gps_localizer_ptr_;
+    int consecutiveBadGpsS;
+    int consecutiveBadGpsSInit;
 };
