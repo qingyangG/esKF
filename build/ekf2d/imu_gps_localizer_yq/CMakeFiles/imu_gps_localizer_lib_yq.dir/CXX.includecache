@@ -53,6 +53,10 @@ imu_gps_localizer_yq/utils.h
 /home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/src/imu_gps_localizer_yq/utils.h
 math.h
 /home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/src/math.h
+glog/logging.h
+-
+iostream
+-
 
 /home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/src/imu_gps_localizer.cpp
 imu_gps_localizer_yq/imu_gps_localizer.h

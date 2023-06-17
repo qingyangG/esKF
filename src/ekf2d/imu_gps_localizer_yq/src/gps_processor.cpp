@@ -2,7 +2,8 @@
 
 #include "imu_gps_localizer_yq/utils.h"
 #include "math.h"
-
+#include <glog/logging.h>
+#include <iostream>
 namespace ImuGpsLocalization_yq {
 
 GpsProcessor::GpsProcessor(const Eigen::Vector3d& I_p_Gps) : I_p_Gps_(I_p_Gps) { }
@@ -20,6 +21,18 @@ bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, con
     if (invM.hasNaN()) {
         return false;
     }
+    
+    // 添加卡方检验
+    const Eigen::Matrix3d& Var = V + H* P * H.transpose();
+    double chi2test = (residual.transpose() * Var.inverse() * residual)(0,0);
+    // double chi2test = (residual.block<2,1>(0, 0).transpose() * Var.block<2,2>(0,0).inverse() * residual.block<2,1>(0, 0) )(0,0);
+    if (chi2test > 1.5 * 11.345) {
+    // if (chi2test > 1.5 * 9.21) {
+        LOG(INFO)<< "chi2test: " << chi2test << "residual" << residual(0) << residual(1) << "\n";
+        std::cout << "V:" << std::endl << V << std::endl;
+        return false;
+     }
+
     // const Eigen::MatrixXd K = P * H.transpose() * (H * P * H.transpose() + V).inverse();
     const Eigen::MatrixXd K = P * H.transpose() * invM;
     const Eigen::VectorXd delta_x = K * residual;

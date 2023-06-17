@@ -11,7 +11,7 @@ add_subdirectory(third_party/GeographicLib_yq)
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIR}
-  third_party/GeographicLib_yq/include()
+  third_party/GeographicLib_yq/include
 )
 
 add_library(imu_gps_localizer_lib_yq
@@ -24,4 +24,5 @@ add_library(imu_gps_localizer_lib_yq
 target_link_libraries(imu_gps_localizer_lib_yq
 	${EIGEN3_LIBS}
   GeographicLib_yq
+  glog
 )

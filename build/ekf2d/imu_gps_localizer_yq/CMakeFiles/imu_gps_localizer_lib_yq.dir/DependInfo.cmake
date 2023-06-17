@@ -23,8 +23,6 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/include"
   "/usr/include/eigen3"
   "/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/third_party/GeographicLib_yq/include"
-  "/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/("
-  "/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/)"
   )
 
 # Targets to which this target links.

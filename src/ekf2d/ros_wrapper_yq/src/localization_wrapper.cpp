@@ -116,8 +116,6 @@ void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstP
                          gps_msg_ptr->altitude;
     gps_data_ptr->cov = Eigen::Map<const Eigen::Matrix3d>(gps_msg_ptr->position_covariance.data());
     
-    imu_gps_localizer_ptr_->ProcessGpsPositionData(gps_data_ptr);
-    
     //yqtest: add origin gps path
     if (imu_gps_localizer_ptr_->getInitialized()) {
         Eigen::Vector3d G_p_Gps;
@@ -126,6 +124,8 @@ void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstP
         state_pub_onlyGPS_.publish(ros_path_onlyGPS_);
     }
     LogGps(gps_data_ptr);
+
+    imu_gps_localizer_ptr_->ProcessGpsPositionData(gps_data_ptr);
 }
 
 void LocalizationWrapper::LogState(const ImuGpsLocalization_yq::State& state) {

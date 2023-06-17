@@ -8,6 +8,6 @@ This is a modified version  for  "https://github.com/ydsf16/imu_gps_localization
 4. Add judgement before inverse () when updating, and avoid to introduce nan value.
 5. In the correction equation, give the inference of H: ![Alt text](image.png)
 6. Relax the gps status condition during initializtion when the environment is not very good.
-7. Reduce bad Gps correction to imu trajectory.
+7. Add chi2 test before gps updation, and reduce bad Gps correction to imu trajectory.
 
 Maybe my operation is not good and even wrong, please feel free to contact me at 1183732164@qq.com

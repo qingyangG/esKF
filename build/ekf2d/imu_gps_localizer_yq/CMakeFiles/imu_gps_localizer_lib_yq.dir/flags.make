@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++14 -fPIC   -std=c++14
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"ekf2d\" -Dimu_gps_localizer_lib_yq_EXPORTS
 
-CXX_INCLUDES = -I/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/include -I/usr/include/eigen3 -I/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/third_party/GeographicLib_yq/include -I"/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/(" -I"/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/)" 
+CXX_INCLUDES = -I/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/include -I/usr/include/eigen3 -I/home/qingyang/workspace/src/ekf2d/imu_gps_localizer_yq/third_party/GeographicLib_yq/include 
 

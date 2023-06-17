@@ -419,7 +419,7 @@ imu_gps_localizer_SOURCE_DIR:STATIC=/home/qingyang/workspace/src/imu_gps_localiz
 imu_gps_localizer_lib_LIB_DEPENDS:STATIC=general;libGeographiccc;
 
 //Dependencies for the target
-imu_gps_localizer_lib_yq_LIB_DEPENDS:STATIC=general;GeographicLib_yq;
+imu_gps_localizer_lib_yq_LIB_DEPENDS:STATIC=general;GeographicLib_yq;general;glog;
 
 //Value Computed by CMake
 imu_gps_localizer_yq_BINARY_DIR:STATIC=/home/qingyang/workspace/build/ekf2d/imu_gps_localizer_yq
