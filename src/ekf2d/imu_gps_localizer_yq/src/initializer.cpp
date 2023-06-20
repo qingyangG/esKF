@@ -48,12 +48,11 @@ bool Initializer::AddGpsPositionData(const GpsPositionDataPtr gps_data_ptr, Stat
     // But, we cannot set the yaw. 
     // So, we set yaw to zero and give it a big covariance.
     // Eigen::Matrix3d RotationInit;
-    if (!ComputeG_R_IFromImuData(&state->G_R_I)) {
+    if (!ComputeG_R_IFromImuData(&state->G_R_I, &state->gyro_bias, &state->acc_bias)) {
         LOG(WARNING) << "[AddGpsPositionData]: Failed to compute G_R_I!";
         return false;
     }
 
-    // state->xyphi(2) = RotationInit.eulerAngles(0,1,2)(2);
     // Set bias to zero.
     state->acc_bias.setZero();
     state->gyro_bias.setZero();
@@ -76,19 +75,26 @@ bool Initializer::AddGpsPositionData(const GpsPositionDataPtr gps_data_ptr, Stat
     return true;
 }
 
-bool Initializer::ComputeG_R_IFromImuData(Eigen::Matrix3d* G_R_I) {
+bool Initializer::ComputeG_R_IFromImuData(Eigen::Matrix3d* G_R_I,  Eigen::Vector3d* bg, Eigen::Vector3d* ba) {
     // Compute mean and std of the imu buffer.
     Eigen::Vector3d sum_acc(0., 0., 0.);
+    Eigen::Vector3d sum_gyro(0., 0., 0.);
     for (const auto imu_data : imu_buffer_) {
         sum_acc += imu_data->acc;
+        sum_gyro += imu_data->gyro;
     }
     const Eigen::Vector3d mean_acc = sum_acc / (double)imu_buffer_.size();
+    const Eigen::Vector3d mean_gyro = sum_gyro / (double)imu_buffer_.size();
 
     Eigen::Vector3d sum_err2(0., 0., 0.);
+    Eigen::Vector3d sum_err2_gyro(0., 0., 0.);
     for (const auto imu_data : imu_buffer_) {
         sum_err2 += (imu_data->acc - mean_acc).cwiseAbs2();
+        // sum_err2_gyro += (imu_data->gyro - mean_gyro).cwiseAbs2();
     }
-    const Eigen::Vector3d std_acc = (sum_err2 / (double)imu_buffer_.size()).cwiseSqrt();
+    const Eigen::Vector3d std_acc = (sum_err2 / (double) (imu_buffer_.size() - 1)).cwiseSqrt();
+    // const Eigen::Vector3d std_gyro = (sum_err2_gyro / (double)(imu_buffer_.size() - 1)).cwiseSqrt();
+
 
     if (std_acc.maxCoeff() > kAccStdLimit) {
         LOG(WARNING) << "[ComputeG_R_IFromImuData]: Too big acc std: " << std_acc.transpose();
@@ -119,6 +125,8 @@ bool Initializer::ComputeG_R_IFromImuData(Eigen::Matrix3d* G_R_I) {
 
     *G_R_I = I_R_G.transpose();
 
+    // *bg = mean_gyro;
+    // *ba = mean_acc - I_R_G * Eigen::Vector3d(0,0, -9.81007);
     return true;
 }
 

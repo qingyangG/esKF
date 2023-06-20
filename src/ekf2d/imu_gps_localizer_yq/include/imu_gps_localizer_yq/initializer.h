@@ -18,7 +18,7 @@ public:
     bool AddGpsPositionData(const GpsPositionDataPtr gps_data_ptr, State* state);
 
 private:
-    bool ComputeG_R_IFromImuData(Eigen::Matrix3d* G_R_I);
+    bool ComputeG_R_IFromImuData(Eigen::Matrix3d* G_R_I,  Eigen::Vector3d* bg, Eigen::Vector3d* ba);
 
     Eigen::Vector3d init_I_p_Gps_;
     std::deque<ImuDataPtr> imu_buffer_;
