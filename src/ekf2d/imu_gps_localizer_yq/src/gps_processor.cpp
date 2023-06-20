@@ -8,7 +8,7 @@ namespace ImuGpsLocalization_yq {
 
 GpsProcessor::GpsProcessor(const Eigen::Vector3d& I_p_Gps) : I_p_Gps_(I_p_Gps) { }
 
-bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, const GpsPositionDataPtr gps_data_ptr, State* state) {
+bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, const GpsPositionDataPtr gps_data_ptr, State* state, int &consecutiveBadGpsS) {
     Eigen::Matrix<double, 3, 15> H;
     Eigen::Vector3d residual;
     ComputeJacobianAndResidual(init_lla, gps_data_ptr, *state, &H, &residual);
@@ -19,19 +19,24 @@ bool GpsProcessor::UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, con
     // yqtest 
     const Eigen::MatrixXd invM = (H * P * H.transpose() + V).inverse();
     if (invM.hasNaN()) {
+        consecutiveBadGpsS++;
         return false;
     }
     
     // 添加卡方检验
     const Eigen::Matrix3d& Var = V + H* P * H.transpose();
-    double chi2test = (residual.transpose() * Var.inverse() * residual)(0,0);
-    // double chi2test = (residual.block<2,1>(0, 0).transpose() * Var.block<2,2>(0,0).inverse() * residual.block<2,1>(0, 0) )(0,0);
-    if (chi2test > 1.5 * 11.345) {
-    // if (chi2test > 1.5 * 9.21) {
+    //double chi2test = (residual.transpose() * Var.inverse() * residual)(0,0);
+    double chi2test = (residual.block<2,1>(0, 0).transpose() * Var.block<2,2>(0,0).inverse() * residual.block<2,1>(0, 0) )(0,0);
+    //if (chi2test > 1.5 * 16.27) {
+    if (chi2test >  13.82) {
         LOG(INFO)<< "chi2test: " << chi2test << "residual" << residual(0) << residual(1) << "\n";
-        std::cout << "V:" << std::endl << V << std::endl;
-        return false;
+        // std::cout << "V:" << std::endl << V << std::endl;
+        if (consecutiveBadGpsS < 5) {
+            consecutiveBadGpsS++;
+            return false;
+        }
      }
+    consecutiveBadGpsS = 0;
 
     // const Eigen::MatrixXd K = P * H.transpose() * (H * P * H.transpose() + V).inverse();
     const Eigen::MatrixXd K = P * H.transpose() * invM;

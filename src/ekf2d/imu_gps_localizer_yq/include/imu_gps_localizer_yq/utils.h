@@ -35,10 +35,10 @@ inline Eigen::Matrix3d GetSkewMatrix(const Eigen::Vector3d& v) {
     return w;
 }
 
-inline Eigen::Matrix3d ComputeJRinvByAA(const Eigen::Vector3d& rv){
-    double theta = rv.norm();
+inline Eigen::Matrix3d ComputeJRinvByAA(const Eigen::AngleAxisd& rv){
+    double theta = rv.angle();
     double half_theta = 0.5 * theta;
-    const Eigen::Vector3d normal = -rv.normalized();
+    const Eigen::Vector3d normal = -rv.axis();
     Eigen::Matrix3d jrInv =  half_theta *cos(half_theta)/sin(half_theta) * Eigen::Matrix3d::Identity()
         + (1 - half_theta *cos(half_theta)/sin(half_theta) ) * normal * normal.transpose()
         - half_theta * GetSkewMatrix(normal);

@@ -17,7 +17,7 @@ public:
 
     bool ProcessImuData(const ImuDataPtr imu_data_ptr, State* fused_state);
 
-    bool ProcessGpsPositionData(const GpsPositionDataPtr gps_data_ptr);
+    bool ProcessGpsPositionData(const GpsPositionDataPtr gps_data_ptr,  int &consecutiveBadGpsS);
 
     Eigen::Vector3d getInitLLA(){
         return init_lla_;

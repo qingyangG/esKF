@@ -19,6 +19,8 @@ private:
     const double gyro_bias_noise_;
 
     const Eigen::Vector3d gravity_;
+
+    Eigen::Vector3d lastDtheta;
 };
 
 }  // namespace ImuGpsLocalization

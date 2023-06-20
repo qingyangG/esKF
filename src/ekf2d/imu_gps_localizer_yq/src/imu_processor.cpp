@@ -2,7 +2,6 @@
 
 #include <glog/logging.h>
 #include <Eigen/Dense>
-
 #include "imu_gps_localizer_yq/utils.h"
 
 namespace ImuGpsLocalization_yq {
@@ -12,7 +11,9 @@ ImuProcessor::ImuProcessor(const double acc_noise, const double gyro_noise,
                            const Eigen::Vector3d& gravity)
     : acc_noise_(acc_noise), gyro_noise_(gyro_noise), 
       acc_bias_noise_(acc_bias_noise), gyro_bias_noise_(gyro_bias_noise),
-      gravity_(gravity) { }
+      gravity_(gravity) { 
+        lastDtheta.setZero();
+      }
 
 void ImuProcessor::Predict(const ImuDataPtr last_imu, const ImuDataPtr cur_imu, State* state) {
     // Time.
@@ -31,7 +32,13 @@ void ImuProcessor::Predict(const ImuDataPtr last_imu, const ImuDataPtr cur_imu, 
     state->G_p_I = last_state.G_p_I + last_state.G_v_I * delta_t + 
                    0.5 * (last_state.G_R_I * acc_unbias + gravity_) * delta_t2;
     state->G_v_I = last_state.G_v_I + (last_state.G_R_I * acc_unbias + gravity_) * delta_t;
-    const Eigen::Vector3d delta_angle_axis = gyro_unbias * delta_t; 
+    Eigen::Vector3d delta_angle_axis = gyro_unbias * delta_t; 
+    Eigen::Vector3d rotVec;
+    // 考虑双子样假设
+    Eigen::Vector3d temp = delta_angle_axis;
+    delta_angle_axis =  delta_angle_axis + lastDtheta.cross(delta_angle_axis) / 12;
+    lastDtheta = temp;
+
     if (delta_angle_axis.norm() > 1e-12) {
         state->G_R_I = last_state.G_R_I * Eigen::AngleAxisd(delta_angle_axis.norm(), delta_angle_axis.normalized()).toRotationMatrix();
     }
@@ -41,14 +48,19 @@ void ImuProcessor::Predict(const ImuDataPtr last_imu, const ImuDataPtr cur_imu, 
     // Covariance of the error-state.   
     Eigen::Matrix<double, 15, 15> Fx = Eigen::Matrix<double, 15, 15>::Identity();
     Fx.block<3, 3>(0, 3)   = Eigen::Matrix3d::Identity() * delta_t;
-    Fx.block<3, 3>(3, 6)   = - state->G_R_I * GetSkewMatrix(acc_unbias) * delta_t;
-    Fx.block<3, 3>(3, 9)   = - state->G_R_I * delta_t;
+    Fx.block<3, 3>(3, 6)   = - last_state.G_R_I * GetSkewMatrix(acc_unbias) * delta_t;
+    Fx.block<3, 3>(3, 9)   = - last_state.G_R_I * delta_t;
     if (delta_angle_axis.norm() > 1e-12) {
         Fx.block<3, 3>(6, 6) = Eigen::AngleAxisd(delta_angle_axis.norm(), delta_angle_axis.normalized()).toRotationMatrix().transpose();
     } else {
         Fx.block<3, 3>(6, 6).setIdentity();
     }
     Fx.block<3, 3>(6, 12)  = - Eigen::Matrix3d::Identity() * delta_t;
+    // yqtest: order 2
+    Fx.block<3,3>(0,6) = Fx.block<3, 3>(3, 6) * delta_t * 0.5;
+    Fx.block<3,3>(0,9) = Fx.block<3, 3>(3, 9) * delta_t * 0.5;
+    Fx.block<3,3>(3,12) = - Fx.block<3, 3>(0, 6);
+
 
     Eigen::Matrix<double, 15, 12> Fi = Eigen::Matrix<double, 15, 12>::Zero();
     Fi.block<12, 12>(3, 0) = Eigen::Matrix<double, 12, 12>::Identity();

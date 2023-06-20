@@ -10,7 +10,7 @@ class GpsProcessor {
 public:
     GpsProcessor(const Eigen::Vector3d& I_p_Gps);
 
-    bool UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, const GpsPositionDataPtr gps_data_ptr, State* state);
+    bool UpdateStateByGpsPosition(const Eigen::Vector3d& init_lla, const GpsPositionDataPtr gps_data_ptr, State* state, int & consecutiveBadGpsS);
 
 private:    
     void ComputeJacobianAndResidual(const Eigen::Vector3d& init_lla,  

@@ -8,7 +8,8 @@
         "/opt/ros/melodic/lib/python2.7/dist-packages"
     ],
     "files.associations": {
-        "geometry": "cpp"
+        "geometry": "cpp",
+        "core": "cpp"
     },
     "cmake.sourceDirectory": "/home/qingyang/workspace/src/ekf2d"
 }

@@ -32,7 +32,7 @@ bool ImuGpsLocalizer::ProcessImuData(const ImuDataPtr imu_data_ptr, State* fused
     return true;
 }
 
-bool ImuGpsLocalizer::ProcessGpsPositionData(const GpsPositionDataPtr gps_data_ptr) {
+bool ImuGpsLocalizer::ProcessGpsPositionData(const GpsPositionDataPtr gps_data_ptr, int &consecutiveBadGpsS) {
     if (!initialized_) {
         if (!initializer_->AddGpsPositionData(gps_data_ptr, &state_)) {
             return false;
@@ -48,7 +48,7 @@ bool ImuGpsLocalizer::ProcessGpsPositionData(const GpsPositionDataPtr gps_data_p
     }
 
     // Update.
-    gps_processor_->UpdateStateByGpsPosition(init_lla_, gps_data_ptr, &state_);
+    gps_processor_->UpdateStateByGpsPosition(init_lla_, gps_data_ptr, &state_,  consecutiveBadGpsS);
 
     return true;
 }

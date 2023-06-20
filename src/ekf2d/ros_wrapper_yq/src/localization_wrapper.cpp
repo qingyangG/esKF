@@ -78,16 +78,18 @@ void LocalizationWrapper::ImuCallback(const sensor_msgs::ImuConstPtr& imu_msg_pt
 
 void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstPtr& gps_msg_ptr) {
     // Check the gps_status.
-    if (gps_msg_ptr->status.status != 2) {
+    if (gps_msg_ptr->status.status < 1) {
         //yqtest
+        //ROS_INFO("status: %d", gps_msg_ptr->status.status);
         if (!imu_gps_localizer_ptr_->getInitialized()) {
             if (consecutiveBadGpsSInit < 25) {  // 5s
-                LOG(WARNING) << "[GpsCallBack]: Bad gps message for initialization!";
                 ROS_INFO("status: %d", gps_msg_ptr->status.status);
+                LOG(WARNING) << "[GpsCallBack]: Bad gps message for initialization!";
                 consecutiveBadGpsSInit++;
                 return;
             }
             else if (gps_msg_ptr->status.status >= 0) {
+                ROS_INFO("status: %d", gps_msg_ptr->status.status);
                 LOG(WARNING) << "[GpsCallBack]: Map will be constructed. But the current environment is bad and the map maybe not good.!";
             }
             else {
@@ -95,16 +97,17 @@ void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstP
                 return;
             }
         }
-        else if (consecutiveBadGpsS < 2)  {
-            // gps不是很好情况下, 短时间允许不矫正.
-            consecutiveBadGpsS++;
-            return;
-        }
+        // else if (consecutiveBadGpsS < 0)  { //  5hz, gps data stream.
+        //     // gps不是很好情况下, 短时间允许不矫正.
+        //     consecutiveBadGpsS++;
+        //     return;
+        // }
         else if ( gps_msg_ptr->status.status >= 0){
-            consecutiveBadGpsS = 0;
+            //consecutiveBadGpsS = 0;
         }
         else {
-            ROS_INFO("status: %d", gps_msg_ptr->status.status);
+            ROS_INFO("current gps is totally invalid!");
+            consecutiveBadGpsS++;
             return;
         }
     }
@@ -125,7 +128,7 @@ void LocalizationWrapper::GpsPositionCallback(const sensor_msgs::NavSatFixConstP
     }
     LogGps(gps_data_ptr);
 
-    imu_gps_localizer_ptr_->ProcessGpsPositionData(gps_data_ptr);
+    imu_gps_localizer_ptr_->ProcessGpsPositionData(gps_data_ptr, consecutiveBadGpsS);
 }
 
 void LocalizationWrapper::LogState(const ImuGpsLocalization_yq::State& state) {
